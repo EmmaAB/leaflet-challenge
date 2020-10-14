@@ -1,10 +1,12 @@
 // Store geoQuery to USGS json
 var geoQuery = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson"
 
+//Create a function to assign the size of the circle markers
 function circleRadius(mag) {
   return mag * 30000;
 }
 
+//Create a function to assign the color of the circle markers based on the magnitude of the earthquake
 function circleColor(mag) {
   if (mag <= 1) {
       return "#ffffd4";
@@ -21,16 +23,6 @@ function circleColor(mag) {
   };
 }
 
-// var colors = [
-//   "#ffffd4",
-//   "#fee391",
-//   "#fec44f",
-//   "#fe9929",
-//   "#d95f0e",
-//   "#993404"
-// ];
-
-
 // Use d3 to query the USGS json URL 
 d3.json(geoQuery, function(data) {
   //Show earthquake data in console
@@ -39,10 +31,9 @@ d3.json(geoQuery, function(data) {
 });
 
 function createMarkers(earthquakeData) {
-
+//Define the earthquake object, then create a function going through the data to assign circles to each earthquake according to the size and color defined above.
   var earthquakes = L.geoJSON(earthquakeData, {
-  // Define a function we want to run once for each feature in the features array
-  // Give each feature a popup describing the place and time of the earthquake
+//Add a popup with information on the location, date, and time
  onEachFeature: function(feature, layer) {
     layer.bindPopup("<h4><p>Location: " + feature.properties.place + "</p></h4><p>" + Date(feature.properties.time) + "</p>" + "<p> Magnitude: " +  feature.properties.mag + "</p>")
     },     pointToLayer: function (feature, coordinates) {
@@ -57,7 +48,7 @@ function createMarkers(earthquakeData) {
   }
   });
 
-
+//Add the earthquakes to the map
   createLayer(earthquakes);
 }
 
@@ -77,41 +68,28 @@ function createMarkers(earthquakeData) {
         zoom: 3,
         layers: [lightmap,earthquakes],
     });
-
+    
+//Define the legend
     var legend = L.control({position: 'bottomright'});
-
+    
+//Function loops through the magnitude limits to create bins corresponding to the colors defined above
     legend.onAdd = function (map) {
     
         var div = L.DomUtil.create('div', 'info legend'),
-            grades = [0, 1, 2, 3, 4, 5]
+            mags = [0, 1, 2, 3, 4, 5]
         
         var legendInfo = "<p>Earthquake<br>Magnitude</p>"
         // loop through our density intervals and generate a label with a colored square for each interval
-        for (var i = 0; i < grades.length; i++) {
+        for (var i = 0; i < mags.length; i++) {
             legendInfo +=
-                '<i style="background:' + circleColor(grades[i] + 1) + '"></i> ' +
-                grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+                '<i style="background:' + circleColor(mags[i] + 1) + '"></i> ' +
+                mags[i] + (mags[i + 1] ? '&ndash;' + mags[i + 1] + '<br>' : '+');
         }
         div.innerHTML = legendInfo;
         return div;
     };
     
     legend.addTo(map);
-  //   var legend = L.control({position: "bottomright"});
-  //   legend.onAdd = function () {
-  //       var div = L.DomUtil.create("div", "legend"),
-  //       // var limits = ,
-  //       var mags = [];
-
-  //       var legendInfo = "<h1>Earthquake Magnitude</h1>" +
-  //       "<div class=\"labels\">" +
-  //       
-    
-       
-  //       return div;
-  //   };
-  
-  // legend.addTo(myMap);
 
 }
 
